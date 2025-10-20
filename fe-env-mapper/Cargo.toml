@@ -1,0 +1,14 @@
+[package]
+name = "fe-env-mapper"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = { workspace = true }
+asyncapiv3 = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+config = {workspace = true}
+env-file-reader = "0"
+walkdir = "2"
