@@ -1,12 +1,11 @@
 name: Release
 
 on:
-  release:
-    types: [ created ] # Trigger when a new release is created in GitHub
   push:
     tags:
       - 'v*'
-
+permissions:
+  contents: write
 jobs:
   build:
     name: Build for ${{ matrix.os }}
