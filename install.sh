@@ -2,7 +2,6 @@
 set -e
 
 # Global variables
-export MAP_ENV_VERSION="1.0.0"
 export MAP_ENV_SERVICE="https://github.com/TikTzuki/tiktuzki-scripts"
 
 if [ -z "$MAP_ENV_DIR" ]; then
@@ -54,17 +53,73 @@ echo "Creating directories..."
 mkdir -p "$map_env_bin_folder"
 
 # Download and install binary
-echo "Downloading map_env..."
-PLATFORM=$(uname -s | tr '[:upper:]' '[:lower:]')
-ARCH=$(uname -m)
+echo "Prime platform file..."
+# infer platform
+function infer_platform() {
+	local kernel
+	local machine
 
-case $ARCH in
-    x86_64) ARCH="x86_64" ;;
-    arm64|aarch64) ARCH="aarch64" ;;
-    *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
-esac
+	kernel="$(uname -s)"
+	machine="$(uname -m)"
 
-BINARY_URL="${MAP_ENV_SERVICE}/releases/latest/download/fe-map_env-${PLATFORM}-${ARCH}"
+	case $kernel in
+	Linux)
+	  case $machine in
+	  i686)
+		echo "linuxx32"
+		;;
+	  x86_64)
+		echo "x86_64-unknown-linux-gnu"
+		;;
+	  armv6l)
+		echo "linuxarm32hf"
+		;;
+	  armv7l)
+		echo "linuxarm32hf"
+		;;
+	  armv8l)
+		echo "linuxarm32hf"
+		;;
+	  aarch64)
+		echo "linuxarm64"
+		;;
+	  *)
+	  	echo "x86_64-unknown-linux-gnu"
+	  	;;
+	  esac
+	  ;;
+	Darwin)
+	  case $machine in
+	  x86_64)
+		echo "x86_64-apple-darwin"
+		;;
+	  arm64)
+		echo "aarch64-apple-darwin"
+		;;
+	  *)
+	  	echo "x86_64-apple-darwin"
+	  	;;
+	  esac
+	  ;;
+	MSYS*|MINGW*)
+	  case $machine in
+	  x86_64)
+		echo "windowsx64"
+		;;
+	  *)
+	  	echo "exotic"
+	  	;;
+	  esac
+	  ;;
+	*)
+	  echo "exotic"
+	esac
+}
+
+export PLATFORM="$(infer_platform)"
+
+BINARY_URL="${MAP_ENV_SERVICE}/releases/latest/download/fe-env-mapper-${PLATFORM}"
+echo "Downloading from $BINARY_URL"
 curl -L "$BINARY_URL" -o "${map_env_bin_folder}/map_env"
 echo "Map env installed at ${map_env_bin_folder}/map_env"
 chmod +x "${map_env_bin_folder}/map_env"
@@ -94,3 +149,4 @@ echo "Installation complete!"
 echo "Please restart your terminal or run:"
 echo "    source ~/.bashrc  # or ~/.zshrc"
 echo "Then try: map_env --help"
+map_env --help
