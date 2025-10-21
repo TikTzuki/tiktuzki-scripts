@@ -5,12 +5,12 @@ edition = "2024"
 
 [dependencies]
 anyhow = { workspace = true }
-asyncapiv3 = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
-serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-config = {workspace = true}
 env-file-reader = "0"
 walkdir = "2"
 dotenvy = {workspace = true}
 fs_extra = "1"
+tokio = { workspace = true, features = ["fs", "rt-multi-thread", "macros"] }
+async-trait = { workspace = true }
+futures = "0.3.31"

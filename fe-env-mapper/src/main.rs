@@ -45,7 +45,9 @@ struct Args {
     )]
     worker: u8,
 }
-fn main() -> anyhow::Result<()> {
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     println!("Args: {:?}", args);
     let mapper = map_env::VITEnvMapper {};
@@ -56,5 +58,5 @@ fn main() -> anyhow::Result<()> {
         args.output_dir,
         args.suffixes,
         args.worker,
-    )
+    ).await
 }
