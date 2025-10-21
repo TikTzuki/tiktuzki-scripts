@@ -12,16 +12,16 @@ use std::io::{self};
 struct Args {
     #[arg(short, long, default_value = "/usr/share/nginx/html")]
     dir: String,
-    #[arg(short, long, default_value = "pattern.env")]
-    pattern_file: String,
+    #[arg(short, long, default_value = ".env")]
+    env_file: String,
     #[arg(short, long, default_value = "1")]
     worker: u8,
-    #[arg(short, long, default_value = "1")]
+    #[arg(short, long, value_delimiter = ',', default_value = "js,html")]
     suffixes: Vec<String>,
 }
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     println!("Args: {:?}", args);
     let mapper = map_env::VITEnvMapper {};
-    mapper.map_env(args.dir, args.pattern_file, args.suffixes, args.worker)
+    mapper.map_env(args.dir, args.env_file, args.suffixes, args.worker)
 }

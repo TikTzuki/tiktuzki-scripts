@@ -65,10 +65,8 @@ impl EnvMapper for VITEnvMapper {
             match ex.as_str() {
                 "html" => {
                     for (env_key, env_val) in &replacements {
-                        let escaped_pattern = format!("\\${{{}}}", env_key); // matches: \${VAR}
                         let pattern = format!("${{{}}}", env_key); // matches: ${VAR}
                         // replace escaped form first
-                        updated = updated.replace(&escaped_pattern, env_val);
                         updated = updated.replace(&pattern, env_val);
                     }
                 }
