@@ -5,7 +5,7 @@ import './App.css'
 
 function App() {
     const [_, setCount] = useState(0);
-    const envVar = import.meta.env.VITE_FOO;
+    const envVar = import.meta.env.VITE_API_URL;
 
     return (
         <>
