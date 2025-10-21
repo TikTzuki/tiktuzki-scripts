@@ -3,7 +3,7 @@ set -e
 
 # Global variables
 export MAP_ENV_VERSION="1.0.0"
-export MAP_ENV_SERVICE="https://github.com/TikTzuki/map_env"
+export MAP_ENV_SERVICE="https://github.com/TikTzuki/tiktuzki-scripts"
 
 if [ -z "$MAP_ENV_DIR" ]; then
     MAP_ENV_DIR="$HOME/.map_env"
@@ -64,8 +64,9 @@ case $ARCH in
     *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
-BINARY_URL="${MAP_ENV_SERVICE}/releases/latest/download/map_env-${PLATFORM}-${ARCH}"
+BINARY_URL="${MAP_ENV_SERVICE}/releases/latest/download/fe-map_env-${PLATFORM}-${ARCH}"
 curl -L "$BINARY_URL" -o "${map_env_bin_folder}/map_env"
+echo "Map env installed at ${map_env_bin_folder}/map_env"
 chmod +x "${map_env_bin_folder}/map_env"
 
 # Update shell profiles
