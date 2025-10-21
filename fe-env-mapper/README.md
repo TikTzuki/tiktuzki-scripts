@@ -1,4 +1,8 @@
 
+## Install
+```shell
+curl https://raw.githubusercontent.com/TikTzuki/tiktuzki-scripts/refs/heads/master/install.sh | bash
+```
 
 ## Map Vite .env
 
@@ -26,7 +30,7 @@ npm run build
 
 3. Run script
 ```shell
-Usage: fe-env-mapper [OPTIONS]
+Usage: map_env [OPTIONS]
 
 Options:
   -d, --dir <DIR>
@@ -54,15 +58,7 @@ Options:
 ```
 
 ```shell
-./map_env \
+map_env \
 -d examples/env-mapper/js_source_code/dist \
 -e examples/env-mapper/js_source_code/.env.production
-```
-
-## Releases script
-```shell
-cargo build --release --bin fe-env-mapper --target x86_64-apple-darwin && cp target/x86_64-apple-darwin/release/fe-env-mapper release/macos_amd/map_env 
-cargo build --release --bin fe-env-mapper --target aarch64-apple-darwin && cp target/aarch64-apple-darwin/release/fe-env-mapper release/macos_arm/map_env
-cargo build --release --bin fe-env-mapper --target x86_64-unknown-linux-gnu && cp target/x86_64-unknown-linux-gnu/release/fe-env-mapper release/linux_amd/map_env
-cargo build --release --bin fe-env-mapper --target aarch64-unknown-linux-gnu && cp target/aarch64-unknown-linux-gnu/release/fe-env-mapper release/linux_arm/map_env
 ```
