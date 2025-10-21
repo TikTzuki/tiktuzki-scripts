@@ -1,6 +1,23 @@
 #!/bin/bash
 set -e
 
+echo ''
+echo '  _______ _____ _  __'
+echo ' |__   __|_   _| |/ /'
+echo '    | |    | | | ''  / '
+echo '    | |    | | |  <  '
+echo '    | |   _| |_| . \ '
+echo '    |_|  |_____|_|\_\'
+echo ''
+echo '             TIK TIKTUZKI'
+echo ''
+echo '------------------------------------------'
+echo '      Welcome to Tik'"'"'s Script Engine     '
+echo '------------------------------------------'
+echo ''
+echo 'Now attempting installation...'
+echo ''
+
 # Global variables
 export MAP_ENV_SERVICE="https://github.com/TikTzuki/tiktuzki-scripts"
 
