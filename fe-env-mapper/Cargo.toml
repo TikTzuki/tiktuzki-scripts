@@ -12,3 +12,5 @@ serde_json = { workspace = true }
 config = {workspace = true}
 env-file-reader = "0"
 walkdir = "2"
+dotenvy = {workspace = true}
+fs_extra = "1"

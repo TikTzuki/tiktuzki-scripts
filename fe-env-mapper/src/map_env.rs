@@ -1,14 +1,18 @@
-use anyhow::anyhow;
+use anyhow::{Context, anyhow};
+use dotenvy::dotenv;
 use env_file_reader::read_file;
+use fs_extra::dir::{CopyOptions, copy};
 use std::collections::HashMap;
-use std::fs;
 use std::path::{Path, PathBuf};
+use std::{env, fs};
 
 pub trait EnvMapper {
     fn map_env(
         &self,
         source_code: String,
         pattern_file: String,
+        dynamic_file: Option<String>,
+        output_dir: Option<String>,
         suffixes: Vec<String>,
         worker: u8,
     ) -> anyhow::Result<()>;
@@ -16,20 +20,50 @@ pub trait EnvMapper {
 
 pub struct VITEnvMapper {}
 
+impl VITEnvMapper {
+    pub fn copy_to_output(source: String, dest: String) -> anyhow::Result<()> {
+        let mut options = CopyOptions::new();
+        options.overwrite = true; // overwrite existing files
+        options.copy_inside = true; // copy contents inside source_dir
+
+        copy(&source, &dest, &options)
+            .context(format!("copy from {} to {} error",&source, &dest))?;
+        Ok(())
+    }
+}
+
 impl EnvMapper for VITEnvMapper {
     fn map_env(
         &self,
         source_code: String,
         pattern_file: String,
+        dynamic_file: Option<String>,
+        output_dir: Option<String>,
         suffixes: Vec<String>,
         worker: u8,
     ) -> anyhow::Result<()> {
+        let start = std::time::Instant::now();
         println!("Processing {}", pattern_file);
+        // Load .env file from the current directory
+        dotenv().ok();
         if !Path::new(&pattern_file).exists() {
             return Err(anyhow!("Pattern file '{}' not found", pattern_file));
         }
 
-        let replacements: HashMap<String, String> = read_file(pattern_file)?;
+        let mut replacements: HashMap<String, String> = read_file(&pattern_file)
+            .context(format!("Failed to read '{}'", &pattern_file))?;
+        let mut full_envs: HashMap<String, String> = env::vars().collect();
+        if let Some(dynamic_file) = dynamic_file {
+            let override_env = read_file(&dynamic_file)
+                .context(format!("Failed to read '{}'", &dynamic_file))?;
+            full_envs.extend(override_env);
+        }
+        for (key, val) in replacements.iter_mut() {
+            if let Some(env_val) = full_envs.get(key) {
+                *val = env_val.to_string();
+            }
+        }
+
         println!("ENVS: {:?}", serde_json::to_string_pretty(&replacements)?);
 
         let source_dir = Path::new(&source_code);
@@ -54,6 +88,11 @@ impl EnvMapper for VITEnvMapper {
         }
         println!("Targets files {:?}", targets);
 
+        if let Some(output_dir) = &output_dir {
+            VITEnvMapper::copy_to_output(source_code.clone(), output_dir.clone())
+                .context("Failed to copy source code to output dir")?;
+        }
+
         for (ex, file_path) in targets {
             if !file_path.is_file() {
                 continue;
@@ -62,32 +101,31 @@ impl EnvMapper for VITEnvMapper {
             let mut updated = original.clone();
 
             // apply replacements; more specific: escaped form first (\${VAR})
-            match ex.as_str() {
-                "html" => {
-                    for (env_key, env_val) in &replacements {
-                        let pattern = format!("${{{}}}", env_key); // matches: ${VAR}
-                        // replace escaped form first
-                        updated = updated.replace(&pattern, env_val);
-                    }
-                }
-                "js" => {
-                    for (env_key, env_val) in &replacements {
-                        let pattern = format!("${{{}}}", env_key); // matches: ${VAR}
-                        // replace escaped form first
-                        updated = updated.replace(&pattern, env_val);
-                    }
-                }
-                _ => {
-                    eprintln!("Unsupported {}", original);
-                }
-            };
+            for (env_key, env_val) in &replacements {
+                let pattern = format!("${{{}}}", env_key); // matches: ${VAR}
+                // replace escaped form first
+                updated = updated.replace(&pattern, env_val);
+            }
 
-            if updated != original {
-                fs::write(&file_path, updated)?;
-                println!("Updated {}", file_path.display());
+            if let Some(output_dir) = &output_dir {
+                let relative_path = file_path
+                    .strip_prefix(source_dir)
+                    .context("Failed to get relative path")?;
+                let output_path = Path::new(output_dir).join(relative_path);
+                if let Some(parent) = output_path.parent() {
+                    fs::create_dir_all(parent)?;
+                }
+                fs::write(&output_path, updated.clone())?;
+                println!("Written to {}", output_path.display());
+            } else {
+                if updated != original {
+                    fs::write(&file_path, updated)?;
+                    println!("Updated {}", file_path.display());
+                }
             }
         }
 
+        println!("map_env execution time: {:?}", start.elapsed());
         Ok(())
     }
 }

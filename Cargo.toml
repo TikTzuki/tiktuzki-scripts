@@ -42,3 +42,4 @@ libp2p-stream = { version = "0.4.0-alpha" }
 binance = { git = "https://github.com/ccxt/binance-rs.git" }
 jsonwebtoken = { version = "10" }
 base64 = { version = "0.22" }
+dotenvy = "0.15"
