@@ -1,4 +1,8 @@
 
+## Install
+```shell
+curl https://raw.githubusercontent.com/TikTzuki/tiktuzki-scripts/refs/heads/master/install.sh | bash
+```
 
 ## Map Vite .env
 
