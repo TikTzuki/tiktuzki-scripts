@@ -1,6 +1,7 @@
 [package]
 name = "env-mapper"
 description = "Front-end environment mapper utility"
+publish = false
 
 version.workspace = true
 edition.workspace = true

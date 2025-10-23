@@ -1,9 +1,9 @@
 mod init_log;
 
+pub use init_log::init_log;
+
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn it_works() {
     }

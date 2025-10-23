@@ -6,16 +6,20 @@ use tracing_subscriber::{EnvFilter, Layer};
 
 /// Initialize logging with optional Tokio console support.
 ///
+/// Keep the returned guard alive for the lifetime of your application to ensure
+/// all logs are flushed to disk.
+///
+/// Example:
+///
+/// ```ignore
 /// #[tokio::main]
-// async fn main() -> anyhow::Result<()> {
-//     let _guard = init_log(); // Keep the guard alive
-//     App::new()
-//         .await?
-//         .run()
-//         .await;
-//     Ok(())
-// }
-fn init() -> Option<WorkerGuard> {
+/// async fn main() -> anyhow::Result<()> {
+///     let _guard = dyson_log::init_log(); // Keep the guard alive
+///     // ... run your app
+///     Ok(())
+/// }
+/// ```
+pub fn init_log() -> Option<WorkerGuard> {
     if std::env::var("TOKIO_CONSOLE_ENABLE").unwrap_or_default() == "1" {
         console_subscriber::init();
     }

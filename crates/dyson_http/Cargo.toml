@@ -1,6 +1,7 @@
 [package]
 name = "dyson_http"
 description = "Dyson HTTP API Support Crate"
+readme = "README.md"
 
 version.workspace = true
 edition.workspace = true

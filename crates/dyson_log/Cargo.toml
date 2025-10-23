@@ -1,6 +1,7 @@
 [package]
 name = "dyson_log"
 description = "Plug and play logging"
+readme = "README.md"
 
 version.workspace = true
 edition.workspace = true
