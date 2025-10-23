@@ -26,14 +26,11 @@ jobs:
       - name: Generate documentation
         run: cargo doc --no-deps --workspace
 
-      - name: Upload to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: rust-docs
           path: target/doc
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
 
   build_binaries:
     name: Build for ${{ matrix.os }}
@@ -91,3 +88,26 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
 
+  deploy_docs:
+    name: Deploy Rust Docs to GitHub Pages
+    needs: build_libs_and_docs
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-docs
+          path: target/doc
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/doc
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
