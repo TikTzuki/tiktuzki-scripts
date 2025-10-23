@@ -12,6 +12,9 @@ jobs:
   build_libs_and_docs:
     name: Build Libraries & Docs
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout source
@@ -23,19 +26,19 @@ jobs:
       - name: Generate documentation
         run: cargo doc --no-deps --workspace
 
-      - name: Upload documentation artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: rust-docs
           path: target/doc
 
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
   publish_crate:
-    name: Publish Rust Crate to crates.io
+    name: Publish (crates.io)
     needs: build_libs_and_docs
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -106,28 +109,3 @@ jobs:
           files: artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-
-
-  deploy_docs:
-    name: Deploy Rust Docs to GitHub Pages
-    needs: build_libs_and_docs
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Download documentation
-        uses: actions/download-artifact@v4
-        with:
-          name: rust-docs
-          path: target/doc
-
-      - name: Upload to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: target/doc
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
