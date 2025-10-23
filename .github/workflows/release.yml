@@ -20,9 +20,6 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build all crates
-        run: cargo build --release --workspace
-
       - name: Generate documentation
         run: cargo doc --no-deps --workspace
 
@@ -31,6 +28,29 @@ jobs:
         with:
           name: rust-docs
           path: target/doc
+
+  publish_crate:
+    name: Publish Rust Crate to crates.io
+    needs: build_libs_and_docs
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.DYSON_CRATE }}
+        run: |
+          cargo publish --verbose --locked
 
   build_binaries:
     name: Build for ${{ matrix.os }}
