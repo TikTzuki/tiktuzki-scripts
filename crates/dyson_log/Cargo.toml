@@ -1,6 +1,6 @@
 [package]
 name = "dyson_log"
-description = "Simple log"
+description = "Plug and play logging"
 
 version.workspace = true
 edition.workspace = true
