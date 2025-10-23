@@ -1,0 +1,21 @@
+[package]
+name = "dyson_http"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+exclude.workspace = true
+
+[dependencies]
+axum = { workspace = true }
+utoipa = { workspace = true, features = ["axum_extras"] }
+utoipa-axum = { workspace = true }
+utoipa-swagger-ui = { workspace = true, features = ["reqwest", "axum"] }
+utoipa-redoc = { workspace = true, features = ["axum"] }
+utoipa-rapidoc = { workspace = true, features = ["axum"] }
+utoipa-scalar = { workspace = true, features = ["axum"] }
+serde_json = { workspace = true }
+serde = { workspace = true , features = ["serde_derive"]}

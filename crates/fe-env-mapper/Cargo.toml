@@ -1,0 +1,27 @@
+[package]
+name = "env-mapper"
+description = "Front-end environment mapper utility"
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+exclude.workspace = true
+
+[[bin]]
+name = "env-mapper"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+env-file-reader = { workspace = true }
+walkdir = { workspace = true }
+dotenvy = { workspace = true }
+fs_extra = { workspace = true }
+tokio = { workspace = true, features = ["fs", "rt-multi-thread", "macros"] }
+async-trait = { workspace = true }
+futures = { workspace = true }

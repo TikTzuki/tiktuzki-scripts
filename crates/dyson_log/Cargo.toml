@@ -1,0 +1,17 @@
+[package]
+name = "dyson_log"
+description = "Simple log"
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+exclude.workspace = true
+
+[dependencies]
+tracing-subscriber = { workspace = true, features = ["fmt", "env-filter", "json"] }
+tracing-appender = { workspace = true }
+console-subscriber = { workspace = true }

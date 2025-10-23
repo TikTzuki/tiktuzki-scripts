@@ -4,10 +4,9 @@ use dotenvy::dotenv;
 use env_file_reader::read_file;
 use fs_extra::dir::{CopyOptions, copy};
 use futures::stream::StreamExt;
-use futures::{stream, stream_select};
+use futures::{stream};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::{env, fs};
 
 #[async_trait]

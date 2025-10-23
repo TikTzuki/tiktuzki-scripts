@@ -6,8 +6,35 @@ on:
       - 'v*'
 permissions:
   contents: write
+
 jobs:
-  build:
+  build_libs_and_docs:
+    name: Build Libraries & Docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build all crates
+        run: cargo build --release --workspace
+
+      - name: Generate documentation
+        run: cargo doc --no-deps --workspace
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/doc
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  build_binaries:
     name: Build for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -15,6 +42,8 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
           - os: macos-latest
             target: x86_64-apple-darwin
           - os: macos-latest
@@ -29,27 +58,27 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Build binary
-        run: cargo build --release --bin fe-env-mapper --target ${{ matrix.target }}
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
 
-      - name: Prepare artifact
-        shell: bash
+      - name: Build binary
+        run: cargo build --bins --release --target ${{ matrix.target }}
+
+      - name: Collect binary artifacts
         run: |
           mkdir -p artifacts
-          binary_name="fe-env-mapper"
-          ext=""
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            ext=".exe"
-          fi
-          cp "target/${{ matrix.target }}/release/${binary_name}${ext}" "artifacts/${binary_name}-${{ matrix.target }}${ext}"
+          for crate in $(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.targets[] | .kind[] == "bin") | .name'); do
+            BIN_PATH="target/${{ matrix.target }}/release/$crate"
+            if [ -f "$BIN_PATH" ]; then
+              cp "$BIN_PATH" "artifacts/${crate}-${{ matrix.target }}"
+            fi
+          done
 
-      - name: Upload release asset
+      - name: Upload binaries
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-      - name: Generate checksums
-        run: |
-          cd artifacts
-          sha256sum * > SHA256SUMS.txt
+
+
