@@ -60,5 +60,5 @@ Options:
 ```shell
 map_env \
 -d examples/env-mapper/js_source_code/dist \
--e examples/env-mapper/js_source_code/.env.production
+-p examples/env-mapper/js_source_code/.env.production
 ```
