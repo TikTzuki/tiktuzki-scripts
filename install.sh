@@ -135,7 +135,7 @@ function infer_platform() {
 
 export PLATFORM="$(infer_platform)"
 
-BINARY_URL="${MAP_ENV_SERVICE}/releases/latest/download/fe-env-mapper-${PLATFORM}"
+BINARY_URL="${MAP_ENV_SERVICE}/releases/latest/download/env-mapper-${PLATFORM}"
 echo "Downloading from $BINARY_URL"
 curl -L "$BINARY_URL" -o "${map_env_bin_folder}/map_env"
 echo "Map env installed at ${map_env_bin_folder}/map_env"
