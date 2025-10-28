@@ -115,7 +115,7 @@ function infer_platform() {
 		;;
 	  *)
 	  echo "x86_64-apple-darwin"
-	  ;
+	  ;;
 	  esac
 	  ;;
 	MSYS*|MINGW*)
