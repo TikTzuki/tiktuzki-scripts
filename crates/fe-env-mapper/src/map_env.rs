@@ -3,11 +3,40 @@ use async_trait::async_trait;
 use dotenvy::dotenv;
 use env_file_reader::read_file;
 use fs_extra::dir::{CopyOptions, copy};
+use futures::stream;
 use futures::stream::StreamExt;
-use futures::{stream};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
+
+#[derive(Debug, Clone)]
+pub enum Placeholder {
+    Underscore,  // `__KEY__` — double underscores surrounding the variable name
+    DoubleCurly, // `{{KEY}}` — double curly braces
+    DollarCurly, // `${KEY}` — dollar sign with single curly braces
+    DollarBrace, // `${{KEY}}` — dollar sign with double curly braces (e.g. used by some templating styles)
+}
+impl Placeholder {
+    pub fn format_template(&self, key: &str) -> String {
+        match self {
+            Placeholder::Underscore => format!("__{}__", key),
+            Placeholder::DoubleCurly => format!("{{{{{}}}}}", key), // yields `{{KEY}}`
+            Placeholder::DollarCurly => format!("${{{}}}", key),    // yields `${KEY}`
+            Placeholder::DollarBrace => format!("${{{{{}}}}}", key), // yields `${{KEY}}`
+        }
+    }
+}
+impl From<u8> for Placeholder {
+    fn from(value: u8) -> Self {
+        match value {
+            1 => Placeholder::Underscore,
+            2 => Placeholder::DoubleCurly,
+            3 => Placeholder::DollarCurly,
+            4 => Placeholder::DollarBrace,
+            _ => Placeholder::Underscore,
+        }
+    }
+}
 
 #[async_trait]
 pub trait EnvMapper {
@@ -19,6 +48,7 @@ pub trait EnvMapper {
         output_dir: Option<String>,
         suffixes: Vec<String>,
         worker: u8,
+        placeholder: Placeholder,
     ) -> anyhow::Result<()>;
 }
 
@@ -38,6 +68,7 @@ impl VITEnvMapper {
     async fn process(
         file_path: PathBuf,
         replacements: &HashMap<String, String>,
+        placeholder: Placeholder,
         source_dir: &Path,
         output_dir: Option<String>,
     ) -> anyhow::Result<()> {
@@ -45,13 +76,10 @@ impl VITEnvMapper {
             return Ok(());
         }
         let original = tokio::fs::read_to_string(&file_path).await?;
-        // let original = fs::read_to_string(&file_path)?;
         let mut updated = original.clone();
 
-        // apply replacements; more specific: escaped form first (\${VAR})
         for (env_key, env_val) in replacements {
-            let pattern = format!("${{{}}}", env_key); // matches: ${VAR}
-            // replace escaped form first
+            let pattern = placeholder.format_template(env_key);
             updated = updated.replace(&pattern, env_val);
         }
 
@@ -85,6 +113,7 @@ impl EnvMapper for VITEnvMapper {
         output_dir: Option<String>,
         suffixes: Vec<String>,
         worker: u8,
+        placeholder: Placeholder,
     ) -> anyhow::Result<()> {
         let start = std::time::Instant::now();
         println!("Processing {}", pattern_file);
@@ -139,8 +168,14 @@ impl EnvMapper for VITEnvMapper {
 
         stream::iter(targets)
             .map(|file_path| async {
-                if let Err(e) =
-                    Self::process(file_path, &replacements, &source_dir, output_dir.clone()).await
+                if let Err(e) = Self::process(
+                    file_path,
+                    &replacements,
+                    placeholder.clone(),
+                    &source_dir,
+                    output_dir.clone(),
+                )
+                .await
                 {
                     eprintln!("Error processing file: {}", e);
                     return Err(e);

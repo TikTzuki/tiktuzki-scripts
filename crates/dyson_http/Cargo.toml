@@ -16,9 +16,9 @@ exclude.workspace = true
 axum = { workspace = true }
 utoipa = { workspace = true, features = ["axum_extras"] }
 utoipa-axum = { workspace = true }
-utoipa-swagger-ui = { workspace = true, features = ["reqwest", "axum"] }
+utoipa-swagger-ui = { workspace = true, features = ["reqwest", "axum", "vendored"] }
 utoipa-redoc = { workspace = true, features = ["axum"] }
 utoipa-rapidoc = { workspace = true, features = ["axum"] }
 utoipa-scalar = { workspace = true, features = ["axum"] }
 serde_json = { workspace = true }
-serde = { workspace = true , features = ["serde_derive"]}
+serde = { workspace = true, features = ["serde_derive"] }

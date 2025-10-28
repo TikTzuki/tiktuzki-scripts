@@ -52,7 +52,7 @@ esac
 echo "Looking for a previous installation of map_env..."
 if [ -d "$MAP_ENV_DIR" ]; then
     echo "map_env found at ${MAP_ENV_DIR}"
-    echo "Please remove existing installation first."
+    echo "Please remove existing installation first: rm -rf ${MAP_ENV_DIR}"
     exit 0
 fi
 
@@ -98,7 +98,7 @@ function infer_platform() {
 		echo "linuxarm32hf"
 		;;
 	  aarch64)
-		echo "linuxarm64"
+		echo "aarch64-unknown-linux-gnu"
 		;;
 	  *)
 	  	echo "x86_64-unknown-linux-gnu"
@@ -114,8 +114,8 @@ function infer_platform() {
 		echo "aarch64-apple-darwin"
 		;;
 	  *)
-	  	echo "x86_64-apple-darwin"
-	  	;;
+	  echo "x86_64-apple-darwin"
+	  ;
 	  esac
 	  ;;
 	MSYS*|MINGW*)
@@ -166,4 +166,3 @@ echo "Installation complete!"
 echo "Please restart your terminal or run:"
 echo "    source ~/.bashrc  # or ~/.zshrc"
 echo "Then try: map_env --help"
-map_env --help

@@ -39,7 +39,7 @@ dyson_http = { path = "../../crates/dyson_http" }
     - Redoc at `/redoc`
     - RapiDoc at `/rapidoc`
     - Scalar (Minimal UI) at `/`
-    - OpenAPI JSON is served from `/http/v1/openapi.json`.
+    - OpenAPI JSON is served from `/api/v1/openapi.json`.
 - Doc helpers
   - Security scheme add-ons: `ApiKeySecuritySchemeAddon`, `JwtSecuritySchemeAddon` (implement `utoipa::Modify`).
   - Route helpers/macros: `register_routes!`, `route_docs!`, and `route_docs_with_name!` to help enrich operations.
