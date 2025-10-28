@@ -114,9 +114,9 @@ function infer_platform() {
 		echo "aarch64-apple-darwin"
 		;;
 	  *)
-	  echo "x86_64-apple-darwin"
-	  ;;
-	  esac
+	    echo "x86_64-apple-darwin"
+	    ;;
+	    esac
 	  ;;
 	MSYS*|MINGW*)
 	  case $machine in
