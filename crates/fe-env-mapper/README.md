@@ -1,64 +1,53 @@
-
-## Install
-```shell
-curl https://raw.githubusercontent.com/TikTzuki/tiktuzki-scripts/refs/heads/master/install.sh | bash
-```
-
 ## Map Vite .env
 
-1. Using env
+### Using env
 
-React env `.env.production`:
-```dotenv
-VITE_API_URL=\${VITE_API_URL}
-```
+Key using [env variables](https://vite.dev/guide/env-and-mode.html) as usual:
 
-HTML Constant Replacement:
-```html
+```javascript
+// React code:
+function App() {
+    const [_, setCount] = useState(0);
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+// Html code:
 <h1>My sample ENV: %VITE_API_URL%</h1>
 ```
 
-2. Build command inside `package.json`:
-```json
-{
-  "build": "tsc -b && vite build --mode production"
-}
-```
-```shell
-npm run build
+Config `.env.production` with template value:
+```dotenv
+VITE_API_URL=__VITE_API_URL__
 ```
 
-3. Run script
+Run build with production mode:
+```shell
+cd js_source_code && npx tsc -b && npx vite build --mode production
+```
+
+After build, you will see in:
+
+```javascript
+// Html file:
+<p>__VITE_API_URL__</p>
+
+// JavaScript file:
+... children:["Var: ","__VITE_API_URL__"]})}),nt.jsx ...
+```
+
+### Run script
+
+[Install](https://github.com/TikTzuki/tiktuzki-scripts/tree/master) env-mapper and run it:
+
+
 ```shell
 Usage: map_env [OPTIONS]
 
-Options:
-  -d, --dir <DIR>
-          [default: /js_source_code/dist]
-
-  -p, --production-env-file <PRODUCTION_ENV_FILE>
-          env value: VITE_API_URL=\${VITE_API_URL}
-          [default: .env.production]
-
-  -e, --dynamic-env-file <DYNAMIC_ENV_FILE>
-          Dynamic env value file to override current envs, default: None
-
-  -s, --suffixes <SUFFIXES>
-          [default: js,html]
-
-  -o, --output-dir <OUTPUT_DIR>
-          Output directory for processed files, default: overwrite
-
-  -w, --worker <WORKER>
-          Number of parallel workers
-          [default: 1]
-
-  -h, --help
-          Print help (see a summary with '-h')
 ```
 
 ```shell
-map_env \
--d examples/env-mapper/js_source_code/dist \
--e examples/env-mapper/js_source_code/.env.production
+./env-mapper-darwin-arm64 \
+-d js_source_code/dist \
+-e js_source_code/.env.runtime \
+-p js_source_code/.env.production \
+-o out
 ```
