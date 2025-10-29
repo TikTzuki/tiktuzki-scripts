@@ -1,69 +1,13 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
 permissions:
   contents: write
   pages: write
   id-token: write
 jobs:
-  build_libs_and_docs:
-    name: Build Libraries & Docs
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Generate documentation
-        run: cargo doc --no-deps --workspace
-
-      - name: Upload to GitHub Pages
-        id: deployment
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: target/doc
-
-  publish_docs:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build_libs_and_docs
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-  publish_crate:
-    name: Publish (crates.io)
-    needs: build_libs_and_docs
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Publish to crates.io
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.DYSON_CRATE }}
-        run: |
-          cargo publish --verbose --locked
-
-  build_binaries:
+  deploy_binaries:
     name: Build for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:

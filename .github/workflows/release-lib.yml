@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+jobs:
+  publish_crate:
+    name: Publish (crates.io)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.DYSON_CRATE }}
+        run: |
+          cargo publish --verbose --locked
