@@ -1,5 +1,8 @@
+mod filter_env;
 mod map_env;
+mod replace_env;
 
+use crate::filter_env::FilterConfig;
 use crate::map_env::{EnvMapper, Placeholder};
 use clap::Parser;
 
@@ -51,6 +54,59 @@ struct Args {
         long_help = "Number of parallel workers"
     )]
     worker: u8,
+
+    #[arg(long, value_delimiter = ',', long_help = "Include exact ENV variables")]
+    include_exact: Vec<String>,
+
+    #[arg(
+        long = "include",
+        value_delimiter = ',',
+        long_help = "Include regex ENV variables"
+    )]
+    include_regex: Vec<String>,
+
+    #[arg(long, value_delimiter = ',', long_help = "Exclude exact ENV variables")]
+    exclude_exact: Vec<String>,
+
+    #[arg(
+        long = "exclude",
+        value_delimiter = ',',
+        long_help = "Exclude regex ENV variables"
+    )]
+    exclude_regex: Vec<String>,
+}
+
+impl Args {
+    /// Build FilterConfig from CLI args
+    fn build_filter_config(&self) -> anyhow::Result<FilterConfig> {
+        let builder = FilterConfig::builder();
+
+        let builder = if !self.include_exact.is_empty() {
+            builder.include_exact(self.include_exact.clone())
+        } else {
+            builder
+        };
+
+        let builder = if !self.include_regex.is_empty() {
+            builder.include_regex(self.include_regex.clone())?
+        } else {
+            builder
+        };
+
+        let builder = if !self.exclude_exact.is_empty() {
+            builder.exclude_exact(self.exclude_exact.clone())
+        } else {
+            builder
+        };
+
+        let builder = if !self.exclude_regex.is_empty() {
+            builder.exclude_regex(self.exclude_regex.clone())?
+        } else {
+            builder
+        };
+
+        Ok(builder.build())
+    }
 }
 
 #[tokio::main]
@@ -58,6 +114,7 @@ async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     println!("Args: {:?}", args);
     let mapper = map_env::VITEnvMapper {};
+    let filter_config = args.build_filter_config()?;
     mapper
         .map_env(
             args.dir,
@@ -67,6 +124,7 @@ async fn main() -> anyhow::Result<()> {
             args.suffixes,
             args.worker,
             Placeholder::from(args.placeholder),
+            filter_config
         )
         .await
 }

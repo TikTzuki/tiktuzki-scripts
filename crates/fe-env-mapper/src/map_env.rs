@@ -1,3 +1,5 @@
+use crate::filter_env::FilterConfig;
+use crate::replace_env::Replacer;
 use anyhow::{Context, anyhow};
 use async_trait::async_trait;
 use dotenvy::dotenv;
@@ -9,7 +11,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Placeholder {
     Underscore,  // `__KEY__` — double underscores surrounding the variable name
     DoubleCurly, // `{{KEY}}` — double curly braces
@@ -17,6 +19,15 @@ pub enum Placeholder {
     DollarBrace, // `${{KEY}}` — dollar sign with double curly braces (e.g. used by some templating styles)
 }
 impl Placeholder {
+    pub fn regex_pattern(&self) -> &str {
+        match self {
+            Placeholder::Underscore => r"__([^_]+(?:_[^_]+)*)__",
+            Placeholder::DoubleCurly => r"\{\{([^}]+)\}\}",
+            Placeholder::DollarCurly => r"\$\{([^}]+)\}",
+            Placeholder::DollarBrace => r"\$\{\{([^}]+)\}\}",
+        }
+    }
+
     pub fn format_template(&self, key: &str) -> String {
         match self {
             Placeholder::Underscore => format!("__{}__", key),
@@ -49,6 +60,7 @@ pub trait EnvMapper {
         suffixes: Vec<String>,
         worker: u8,
         placeholder: Placeholder,
+        filter_config: FilterConfig,
     ) -> anyhow::Result<()>;
 }
 
@@ -68,6 +80,7 @@ impl VITEnvMapper {
     async fn process(
         file_path: PathBuf,
         replacements: &HashMap<String, String>,
+        filter_config: FilterConfig,
         placeholder: Placeholder,
         source_dir: &Path,
         output_dir: Option<String>,
@@ -76,11 +89,22 @@ impl VITEnvMapper {
             return Ok(());
         }
         let original = tokio::fs::read_to_string(&file_path).await?;
-        let mut updated = original.clone();
 
-        for (env_key, env_val) in replacements {
-            let pattern = placeholder.format_template(env_key);
-            updated = updated.replace(&pattern, env_val);
+        let replacer = Replacer::new()?;
+
+        // Filter env values based on filter config
+        let filtered_replacements: HashMap<String, String> = replacements
+            .iter()
+            .filter(|(key, _)| filter_config.should_process(key))
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect();
+
+        // Replace placeholders
+        let updated = replacer.replace_all(&original, &filtered_replacements, &placeholder)?;
+
+        // Print stats if verbose or has changes
+        if updated != original {
+            println!("📝 Processing: {}", file_path.display());
         }
 
         if let Some(output_dir) = &output_dir {
@@ -114,6 +138,7 @@ impl EnvMapper for VITEnvMapper {
         suffixes: Vec<String>,
         worker: u8,
         placeholder: Placeholder,
+        filter_config: FilterConfig,
     ) -> anyhow::Result<()> {
         let start = std::time::Instant::now();
         println!("Processing {}", pattern_file);
@@ -166,11 +191,39 @@ impl EnvMapper for VITEnvMapper {
                 .context("Failed to copy source code to output dir")?;
         }
 
+        if !filter_config.is_empty() {
+            println!("Filter Configuration:");
+            println!(
+                "  Include rules: {} rules",
+                filter_config.include_rules.len()
+            );
+            println!(
+                "  Exclude rules: {} rules",
+                filter_config.exclude_rules.len()
+            );
+
+            // Show which keys will be processed
+            let filtered_keys: Vec<&String> = replacements
+                .keys()
+                .filter(|k| filter_config.should_process(k))
+                .collect();
+            println!("  Keys to process: {:?}", filtered_keys);
+
+            let skipped_keys: Vec<&String> = replacements
+                .keys()
+                .filter(|k| !filter_config.should_process(k))
+                .collect();
+            if !skipped_keys.is_empty() {
+                println!("  Keys to skip: {:?}", skipped_keys);
+            }
+        }
+
         stream::iter(targets)
             .map(|file_path| async {
                 if let Err(e) = Self::process(
                     file_path,
                     &replacements,
+                    filter_config.clone(),
                     placeholder.clone(),
                     &source_dir,
                     output_dir.clone(),
