@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["router_with_docs"],"struct":["ApiKeySecuritySchemeAddon","JwtSecuritySchemeAddon"]};

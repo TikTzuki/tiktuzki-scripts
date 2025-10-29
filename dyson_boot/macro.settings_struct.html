@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Generates a configuration loader for a struct with file and environment variable support."><title>settings_struct in dyson_boot - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="dyson_boot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.90.0 (1159e78c4 2025-09-14)" data-channel="1.90.0" data-search-js="search-fa3e91e5.js" data-settings-js="settings-5514c975.js" ><script src="../static.files/storage-68b7e25d.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-eebb9057.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc macro"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../dyson_boot/index.html">dyson_<wbr>boot</a><span class="version">0.0.9</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">settings_<wbr>struct</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#usage" title="Usage">Usage</a><ul><li><a href="#basic-usage-with-defaults" title="Basic Usage (with defaults)">Basic Usage (with defaults)</a></li><li><a href="#custom-configuration" title="Custom Configuration">Custom Configuration</a></li></ul></li><li><a href="#generated-code" title="Generated Code">Generated Code</a></li><li><a href="#environment-variables" title="Environment Variables">Environment Variables</a></li><li><a href="#configuration-file-location" title="Configuration File Location">Configuration File Location</a></li><li><a href="#panics" title="Panics">Panics</a></li><li><a href="#requirements" title="Requirements">Requirements</a></li><li><a href="#examples" title="Examples">Examples</a><ul><li><a href="#with-environment-variable-override" title="With Environment Variable Override">With Environment Variable Override</a></li><li><a href="#multiple-configurations" title="Multiple Configurations">Multiple Configurations</a></li></ul></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate dyson_<wbr>boot</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">dyson_boot</a></div><h1>Macro <span class="macro">settings_struct</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/dyson_boot/setting.rs.html#160-229">Source</a> </span></div><pre class="rust item-decl"><code>macro_rules! settings_struct {
+    ($name:ty) =&gt; { ... };
+    (
+        $name:ty,
+        $CONFIG_DIR_VAR_NAME:expr,
+        $config_file:expr,
+        load_env = ($prefix:expr, $separator:expr, $list_separator:expr)
+    ) =&gt; { ... };
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Generates a configuration loader for a struct with file and environment variable support.</p>
+<p>This macro creates a complete configuration loading system including:</p>
+<ul>
+<li>A <code>load()</code> method that reads from config files and environment variables</li>
+<li>A thread-safe static singleton instance</li>
+<li>A getter function to access the configuration from anywhere in your app</li>
+</ul>
+<h2 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h2><h3 id="basic-usage-with-defaults"><a class="doc-anchor" href="#basic-usage-with-defaults">§</a>Basic Usage (with defaults)</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>dyson_boot::settings_struct;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
+
+<span class="attr">#[derive(Debug, Clone, Deserialize, Serialize)]
+</span><span class="kw">struct </span>AppConfig {
+    <span class="kw">pub </span>host: String,
+    <span class="kw">pub </span>port: u16,
+}
+
+<span class="comment">// Uses default values:
+// - Config dir: APP__CONFIG_DIR env var (defaults to ".")
+// - Config file: app_config.json
+// - Env prefix: APP
+// - Env separator: __
+// - List separator: ,
+</span><span class="macro">settings_struct!</span>(AppConfig);
+
+<span class="kw">fn </span>main() {
+    <span class="kw">let </span>config = get_app_config();
+    <span class="macro">println!</span>(<span class="string">"Host: {}"</span>, config.host);
+}</code></pre></div>
+<h3 id="custom-configuration"><a class="doc-anchor" href="#custom-configuration">§</a>Custom Configuration</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>dyson_boot::settings_struct;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
+
+<span class="attr">#[derive(Debug, Clone, Deserialize, Serialize)]
+</span><span class="kw">struct </span>DatabaseConfig {
+    <span class="kw">pub </span>url: String,
+    <span class="kw">pub </span>max_connections: u32,
+}
+
+<span class="macro">settings_struct!</span>(
+    DatabaseConfig,
+    <span class="string">"DB_CONFIG_DIR"</span>,       <span class="comment">// Environment variable for config directory
+    </span><span class="string">"database.json"</span>,       <span class="comment">// Config file name
+    </span>load_env = (
+        <span class="string">"DATABASE"</span>,        <span class="comment">// Environment variable prefix
+        </span><span class="string">"__"</span>,              <span class="comment">// Environment variable separator
+        </span><span class="string">","
+    </span>)                       <span class="comment">// List separator for array values
+</span>)
+
+<span class="kw">fn </span>main() {
+    <span class="kw">let </span>db_config = get_database_config();
+    <span class="macro">println!</span>(<span class="string">"DB URL: {}"</span>, db_config.url);
+}</code></pre></div>
+<h2 id="generated-code"><a class="doc-anchor" href="#generated-code">§</a>Generated Code</h2>
+<p>For a struct named <code>AppConfig</code>, the macro generates:</p>
+<ul>
+<li><code>impl AppConfig { fn load(config_path: PathBuf) -&gt; anyhow::Result&lt;Self&gt; }</code></li>
+<li>A static <code>APP_CONFIG: Lazy&lt;Arc&lt;AppConfig&gt;&gt;</code></li>
+<li>A function <code>get_app_config() -&gt; Arc&lt;AppConfig&gt;</code></li>
+</ul>
+<h2 id="environment-variables"><a class="doc-anchor" href="#environment-variables">§</a>Environment Variables</h2>
+<p>The macro supports overriding config values via environment variables:</p>
+<div class="example-wrap"><pre class="language-bash"><code># Override top-level fields
+export APP__host=0.0.0.0
+export APP__port=3000
+
+# Override nested fields (if using nested structs)
+export APP__database__url=postgres://localhost/mydb</code></pre></div><h2 id="configuration-file-location"><a class="doc-anchor" href="#configuration-file-location">§</a>Configuration File Location</h2>
+<p>The config file path is determined by:</p>
+<ol>
+<li>Reading the directory from the specified environment variable (e.g., <code>APP__CONFIG_DIR</code>)</li>
+<li>If not set, defaults to current directory (<code>.</code>)</li>
+<li>Joins the directory with the config file name</li>
+</ol>
+<h2 id="panics"><a class="doc-anchor" href="#panics">§</a>Panics</h2>
+<p>The generated code will panic and exit the process if:</p>
+<ul>
+<li>The configuration file cannot be found</li>
+<li>The configuration file contains invalid data</li>
+<li>Required fields are missing</li>
+</ul>
+<h2 id="requirements"><a class="doc-anchor" href="#requirements">§</a>Requirements</h2>
+<p>Your configuration struct must:</p>
+<ul>
+<li>Implement <code>serde::Deserialize</code> and <code>serde::Serialize</code></li>
+<li>Have all fields that can be deserialized from the config file format</li>
+</ul>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2><h3 id="with-environment-variable-override"><a class="doc-anchor" href="#with-environment-variable-override">§</a>With Environment Variable Override</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>dyson_boot::settings_struct;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
+
+<span class="attr">#[derive(Debug, Clone, Deserialize, Serialize)]
+</span><span class="kw">struct </span>ServerConfig {
+    <span class="kw">pub </span>bind_address: String,
+    <span class="kw">pub </span>port: u16,
+    <span class="kw">pub </span>workers: usize,
+}
+
+<span class="macro">settings_struct!</span>(
+    ServerConfig,
+    <span class="string">"SERVER_CONFIG_DIR"</span>,
+    <span class="string">"server.json"</span>,
+    load_env = (<span class="string">"SERVER"</span>,
+    <span class="string">"__"</span>,
+    <span class="string">","</span>)
+);
+
+<span class="kw">fn </span>main() {
+    <span class="comment">// Set environment: export SERVER__port=9000
+    </span><span class="kw">let </span>config = get_server_config();
+    <span class="macro">println!</span>(<span class="string">"Server will bind to {}:{}"</span>, config.bind_address, config.port);
+}</code></pre></div>
+<h3 id="multiple-configurations"><a class="doc-anchor" href="#multiple-configurations">§</a>Multiple Configurations</h3>
+<p>You can use this macro multiple times for different config structs:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>dyson_boot::settings_struct;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
+
+<span class="attr">#[derive(Debug, Clone, Deserialize, Serialize)]
+</span><span class="kw">struct </span>AppConfig { <span class="kw">pub </span>name: String }
+
+<span class="attr">#[derive(Debug, Clone, Deserialize, Serialize)]
+</span><span class="kw">struct </span>DbConfig { <span class="kw">pub </span>url: String }
+
+<span class="macro">settings_struct!</span>(AppConfig);
+<span class="macro">settings_struct!</span>(DbConfig, <span class="string">"DB_CONFIG_DIR"</span>, <span class="string">"db.json"</span>,load_env = (<span class="string">"DB"</span>, <span class="string">"__"</span>, <span class="string">","</span>));
+
+<span class="kw">fn </span>main() {
+    <span class="kw">let </span>app = get_app_config();
+    <span class="kw">let </span>db = get_db_config();
+    <span class="macro">println!</span>(<span class="string">"App: {}, DB: {}"</span>, app.name, db.url);
+}</code></pre></div>
+</div></details></section></div></main></body></html>

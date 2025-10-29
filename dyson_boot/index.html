@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Dyson Boot"><title>dyson_boot - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="dyson_boot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.90.0 (1159e78c4 2025-09-14)" data-channel="1.90.0" data-search-js="search-fa3e91e5.js" data-settings-js="settings-5514c975.js" ><script src="../static.files/storage-68b7e25d.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-eebb9057.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../dyson_boot/index.html">dyson_<wbr>boot</a><span class="version">0.0.9</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#dyson-boot" title="Dyson Boot">Dyson Boot</a><ul><li><a href="#features" title="Features">Features</a></li><li><a href="#quick-example" title="Quick Example">Quick Example</a></li><li><a href="#how-it-works" title="How It Works">How It Works</a></li><li><a href="#configuration-priority" title="Configuration Priority">Configuration Priority</a></li></ul></li></ul><h3><a href="#modules">Crate Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#macros" title="Macros">Macros</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>dyson_boot</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/dyson_boot/lib.rs.html#1-52">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="dyson-boot"><a class="doc-anchor" href="#dyson-boot">§</a>Dyson Boot</h2>
+<p>A convenient Rust crate for quickly bootstrapping application configuration with minimal boilerplate.</p>
+<h3 id="features"><a class="doc-anchor" href="#features">§</a>Features</h3>
+<ul>
+<li>Zero-boilerplate configuration loading with a simple macro</li>
+<li>Multi-source configuration (files + environment variables)</li>
+<li>Thread-safe singleton pattern with lazy initialization</li>
+<li>Type-safe deserialization using <code>serde</code></li>
+<li>Environment variable override support</li>
+</ul>
+<h3 id="quick-example"><a class="doc-anchor" href="#quick-example">§</a>Quick Example</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>dyson_boot::settings_struct;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
+
+<span class="attr">#[derive(Debug, Clone, Deserialize, Serialize)]
+</span><span class="kw">struct </span>AppConfig {
+    <span class="kw">pub </span>host: String,
+    <span class="kw">pub </span>port: u16,
+    <span class="kw">pub </span>debug: bool,
+}
+
+<span class="comment">// Generate configuration loader with defaults
+</span><span class="macro">settings_struct!</span>(AppConfig);
+
+<span class="kw">fn </span>main() {
+    <span class="comment">// Access configuration anywhere in your app
+    </span><span class="kw">let </span>config = get_app_config();
+    <span class="macro">println!</span>(<span class="string">"Server running on {}:{}"</span>, config.host, config.port);
+}</code></pre></div>
+<h3 id="how-it-works"><a class="doc-anchor" href="#how-it-works">§</a>How It Works</h3>
+<p>The <code>settings_struct!</code> macro generates:</p>
+<ol>
+<li>A <code>load()</code> method that reads configuration from files and environment variables</li>
+<li>A thread-safe static instance using <code>once_cell::Lazy</code></li>
+<li>A getter function <code>get_{struct_name}()</code> that returns an <code>Arc&lt;YourConfig&gt;</code></li>
+</ol>
+<p>The configuration is loaded lazily on first access and cached for the application lifetime.</p>
+<h3 id="configuration-priority"><a class="doc-anchor" href="#configuration-priority">§</a>Configuration Priority</h3>
+<p>Values are loaded in this order (later sources override earlier ones):</p>
+<ol>
+<li>Configuration file (JSON, TOML, YAML, etc.)</li>
+<li>Environment variables with the specified prefix</li>
+</ol>
+<p>See the <a href="macro.settings_struct.html" title="macro dyson_boot::settings_struct"><code>settings_struct</code></a> macro documentation for more details.</p>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="setting/index.html" title="mod dyson_boot::setting">setting</a></dt></dl><h2 id="macros" class="section-header">Macros<a href="#macros" class="anchor">§</a></h2><dl class="item-table"><dt><a class="macro" href="macro.settings_struct.html" title="macro dyson_boot::settings_struct">settings_<wbr>struct</a></dt><dd>Generates a configuration loader for a struct with file and environment variable support.</dd></dl></section></div></main></body></html>

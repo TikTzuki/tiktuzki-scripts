@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Placeholder"],"struct":["VITEnvMapper"],"trait":["EnvMapper"]};

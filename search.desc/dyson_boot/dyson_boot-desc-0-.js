@@ -1,0 +1,1 @@
+searchState.loadedDescShard("dyson_boot", 0, "Dyson Boot\nGenerates a configuration loader for a struct with file …")
