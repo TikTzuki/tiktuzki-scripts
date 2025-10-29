@@ -26,3 +26,4 @@ fs_extra = { workspace = true }
 tokio = { workspace = true, features = ["fs", "rt-multi-thread", "macros"] }
 async-trait = { workspace = true }
 futures = { workspace = true }
+regex = "1.12.2"
