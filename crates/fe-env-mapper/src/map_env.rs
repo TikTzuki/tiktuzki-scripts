@@ -104,7 +104,7 @@ impl VITEnvMapper {
 
         // Print stats if verbose or has changes
         if updated != original {
-            println!("📝 Processing: {}", file_path.display());
+            println!("Processing: {}", file_path.display());
         }
 
         if let Some(output_dir) = &output_dir {

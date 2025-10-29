@@ -49,4 +49,11 @@
 //! 2. Environment variables with the specified prefix
 //!
 //! See the [`settings_struct`] macro documentation for more details.
+
+/// Settings module
+// ///
+// /// Contains helpers and types for loading and managing application configuration:
+// /// - `settings_struct!` macro generated loader for typed config
+// /// - Multi-source loading (files + environment) with override precedence
+// /// - Thread-safe cached instance for global access
 pub mod setting;

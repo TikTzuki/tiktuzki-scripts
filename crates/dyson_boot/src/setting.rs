@@ -169,18 +169,12 @@ macro_rules! settings_struct {
         $config_file:expr,
         load_env = ($prefix:expr, $separator:expr, $list_separator:expr)
     ) => {
-        use std::path::{Path, PathBuf};
-        use serde_json;
-        use anyhow::anyhow;
-        use once_cell::sync::Lazy;
-        use std::sync::Arc;
-
         impl $name {
-            fn load(config_path: PathBuf) -> anyhow::Result<Self> {
+            fn load(config_path: ::std::path::PathBuf) -> ::anyhow::Result<Self> {
                 let name_str = stringify!($name);
                 let path_str = config_path.to_string_lossy().to_string();
                 if !config_path.exists() {
-                    return Err(anyhow!("Configuration file '{}' not found", path_str));
+                    return Err(::anyhow::anyhow!("Configuration file '{}' not found", path_str));
                 }
 
                 let mut builder = config::Config::builder()
@@ -199,19 +193,19 @@ macro_rules! settings_struct {
                     "Loaded config {} from {}\n {}",
                     name_str,
                     path_str,
-                    serde_json::to_string_pretty(&app_config)?
+                    ::serde_json::to_string_pretty(&app_config)?
                 );
                 Ok(app_config)
             }
         }
 
-        paste::paste! {
-            static [<$name:snake:upper>]: Lazy<Arc<$name>> = Lazy::new(|| {
+        ::paste::paste! {
+            static [<$name:snake:upper>] : ::once_cell::sync::Lazy<::std::sync::Arc<$name>> = ::once_cell::sync::Lazy::new(|| {
                 let binding = std::env::var($CONFIG_DIR_VAR_NAME).unwrap_or_else(|_| ".".to_string());
-                let config_dir = Path::new(&binding);
+                let config_dir = ::std::path::Path::new(&binding);
                 let config_file = config_dir.join($config_file);
                 match $name::load(config_file) {
-                    Ok(cfg) => Arc::new(cfg),
+                    Ok(cfg) => ::std::sync::Arc::new(cfg),
                     Err(e) => {
                         eprintln!("Failed to load config {}", e);
                         std::process::exit(1);
@@ -220,10 +214,10 @@ macro_rules! settings_struct {
             });
         }
 
-        paste::paste! {
-            pub fn [<get_ $name:snake:lower>]() -> Arc<$name> {
+        ::paste::paste! {
+            pub fn [<get_ $name:snake:lower>]() -> ::std::sync::Arc<$name> {
                 [<$name:snake:upper>].clone()
-            };
+            }
         }
     };
 }
