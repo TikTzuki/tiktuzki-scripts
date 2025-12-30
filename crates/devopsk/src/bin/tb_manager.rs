@@ -1,8 +1,8 @@
 #![allow(missing_docs)]
 use anyhow::{Context, Result};
-use aws_config::{defaults, BehaviorVersion, Region};
-use aws_sdk_s3::primitives::{ByteStream, SdkBody};
+use aws_config::{BehaviorVersion, Region, defaults};
 use aws_sdk_s3::Client;
+use aws_sdk_s3::primitives::{ByteStream, SdkBody};
 use chrono::Utc;
 use clap::Parser;
 use devopsk::process_reader::ProgressBody;
@@ -25,7 +25,7 @@ struct Args {
     #[arg(
         long,
         short,
-        default_value_t = 300,
+        default_value_t = 0,
         help = "Backup interval in seconds (0 to disable)"
     )]
     interval_secs: u64,
@@ -80,11 +80,7 @@ pub trait BackupStrategy {
 impl BackupStrategy for Client {
     async fn upload_backup(&self, bucket: &str, path: &PathBuf) -> Result<()> {
         let meta = tokio::fs::metadata(path).await?;
-        info!(
-            "Starting backup: {:?}, {} bytes",
-            &path,
-            meta.len()
-        );
+        info!("Starting backup: {:?}, {} bytes", &path, meta.len());
 
         let compressed_path = compress_file(path).await?;
         let body = ByteStream::read_from()
@@ -208,9 +204,9 @@ async fn main() -> Result<()> {
                 args.backup_file
             ));
         }
-        let region = "ap-southeast-1";
+        let region = std::env::var("AWS_DEFAULT_REGION").unwrap_or("ap-southeast-1".to_string());
         let bucket = args.bucket.as_str();
-        let config = aws_config::defaults(BehaviorVersion::v2025_08_07())
+        let config = defaults(BehaviorVersion::v2025_08_07())
             .region(Region::new(region.to_owned()))
             .load()
             .await;
