@@ -81,9 +81,9 @@ impl BackupStrategy for Client {
     async fn upload_backup(&self, bucket: &str, path: &PathBuf) -> Result<()> {
         let meta = tokio::fs::metadata(path).await?;
         info!(
-            "Starting backup: {:?}, {} GB",
+            "Starting backup: {:?}, {} bytes",
             &path,
-            meta.len() / 1024 / 1024 / 1024
+            meta.len()
         );
 
         let compressed_path = compress_file(path).await?;
@@ -109,9 +109,9 @@ impl BackupStrategy for Client {
             .body(body);
         let meta = tokio::fs::metadata(&compressed_path).await?;
         info!(
-            "Uploading compressed backup: {:?}, {} GB",
+            "Uploading compressed backup: {:?}, {} bytes",
             &compressed_path,
-            meta.len() / 1024 / 1024 / 1024
+            meta.len()
         );
         let customized = request
             .customize()
