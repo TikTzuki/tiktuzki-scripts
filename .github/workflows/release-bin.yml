@@ -55,7 +55,7 @@ jobs:
               ;;
             aarch64-unknown-linux-musl)
               rustup target add aarch64-unknown-linux-musl
-                sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu
+              sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu
               cargo install cross
           #              LINKER="aarch64-linux-musl-gcc"
                LINKER="aarch64-linux-gnu-gcc"
