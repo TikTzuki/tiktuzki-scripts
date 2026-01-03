@@ -54,13 +54,17 @@ jobs:
               LINKER="x86_64-linux-musl-gcc"
               ;;
             aarch64-unknown-linux-musl)
-              sudo apt-get install -y gcc-aarch64-linux-musl
+              sudo apt-get install -y gcc-aarch64-linux-gnu musl-tools
               LINKER="aarch64-linux-musl-gcc"
+              echo "cc = \"aarch64-linux-musl-gcc\"" >> .cargo/config.toml
+              echo "cxx = \"aarch64-linux-musl-g++\"" >> .cargo/config.toml
+              echo "ar = \"aarch64-linux-musl-ar\"" >> .cargo/config.toml
               ;;
           esac
           
           echo "[target.${{ matrix.target }}]" >> .cargo/config.toml
           echo "linker = \"$LINKER\"" >> .cargo/config.toml
+
       - name: Build binary
         run: cargo build --bins --release --target ${{ matrix.target }}
 
