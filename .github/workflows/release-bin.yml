@@ -55,12 +55,15 @@ jobs:
               ;;
             aarch64-unknown-linux-musl)
               rustup target add aarch64-unknown-linux-musl
-              sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu gcc-aarch64-linux-musl
+                sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu
               cargo install cross
-              LINKER="aarch64-linux-musl-gcc"
-              echo "cc = \"aarch64-linux-musl-gcc\"" >> .cargo/config.toml
-              echo "cxx = \"aarch64-linux-musl-g++\"" >> .cargo/config.toml
-              echo "ar = \"aarch64-linux-musl-ar\"" >> .cargo/config.toml
+          #              LINKER="aarch64-linux-musl-gcc"
+               LINKER="aarch64-linux-gnu-gcc"
+          #              echo "cc = \"aarch64-linux-musl-gcc\"" >> .cargo/config.toml
+          #              echo "cxx = \"aarch64-linux-musl-g++\"" >> .cargo/config.toml
+          #              echo "ar = \"aarch64-linux-musl-ar\"" >> .cargo/config.toml
+               export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc
+               export CC=aarch64-linux-gnu-gcc
               ;;
           esac
           
