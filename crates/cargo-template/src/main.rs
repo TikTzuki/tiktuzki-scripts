@@ -20,7 +20,7 @@
 mod cargo_manager;
 mod template;
 
-use crate::template::render_template;
+use crate::template::render_templates;
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
@@ -41,11 +41,12 @@ enum Commands {
     /// Render a template into a target Cargo.toml file
     RenderTemplate {
         /// Name of the template to apply (e.g., "workspace", "axum", "sqlx_postgres")
-        template: String,
+        #[arg(short, long)]
+        templates: String,
 
         /// Target directory containing Cargo.toml (defaults to current directory)
         #[arg(short, long, default_value = ".")]
-        target: PathBuf,
+        package: PathBuf,
     },
 }
 
@@ -53,11 +54,14 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::RenderTemplate { template, target } => {
-            render_template(&template, &target)?;
+        Commands::RenderTemplate {
+            templates,
+            package: target,
+        } => {
+            render_templates(templates.split(",").collect(), &target)?;
             println!(
-                "✓ Successfully rendered template '{}' to {}",
-                template,
+                "Successfully rendered template '{}' to {}",
+                templates,
                 target.display()
             );
         }

@@ -64,6 +64,14 @@ fn update_dependencies(manager: &mut dyn CargoManager, dependencies: &dyn TableL
 /// # Ok(())
 /// # }
 /// ```
+pub fn render_templates(template_name: Vec<&str>, target: &PathBuf) -> Result<()> {
+    for name in template_name {
+        render_template(name, target)
+            .with_context(|| format!("Failed to render template '{}'", name))?;
+    }
+    Ok(())
+}
+
 pub fn render_template(template_name: &str, target: &PathBuf) -> Result<()> {
     // Load template from embedded resources
     let template_path = TEMPLATE_DIR

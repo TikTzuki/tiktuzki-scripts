@@ -18,6 +18,21 @@ echo ''
 echo 'Now attempting installation...'
 echo ''
 
+TOOL=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --tool)
+      TOOL="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
 # Global variables
 export MAP_ENV_SERVICE="https://github.com/TikTzuki/tiktuzki-scripts"
 

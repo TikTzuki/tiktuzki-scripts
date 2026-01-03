@@ -6,13 +6,42 @@
 
 **env-mapper** is a CLI tool that solves the problem of hardcoded environment variables in frontend builds. It allows you to use placeholders with default values that get replaced at runtime, enabling true "build once, deploy everywhere" workflow.
 
+## FE Env Mapper
+
+Examples usage: https://github.com/TikTzuki/tiktuzki-scripts/tree/master/examples/env-mapper
+
+```shell
+Usage: env-mapper [OPTIONS]
+
+Options:
+  -d, --dir <DIR>
+          [default: /js_source_code/dist]
+  -p, --production-env-file <PRODUCTION_ENV_FILE>
+          env value: VITE_API_URL=__VITE_API_URL__ [default: .env.production]
+      --placeholder <PLACEHOLDER>
+          Template place holder: 1. __KEY__ 
+           2. {{KEY}} 
+           3. ${KEY} 
+           4. ${{KEY}} [default: 1]
+  -e, --runtime-env-file <RUNTIME_ENV_FILE>
+          Runtime env value file to override current envs, default: None
+  -s, --suffixes <SUFFIXES>
+          [default: js,html]
+  -o, --output-dir <OUTPUT_DIR>
+          Output directory for processed files, default: overwrite
+  -w, --worker <WORKER>
+          Number of parallel workers [default: 1]
+  -h, --help
+          Print help (see more with '--help')
+```
+
 ### Key Features
 
-- ✅ **Default Value Fallback** - `__VITE_API_URL:http://localhost:3000__`
-- ✅ **4 Placeholder Styles** - `__KEY__`, `{{KEY}}`, `${KEY}`, `${{KEY}}`
-- ✅ **Include/Exclude Filtering** - Regex or exact match control
-- ✅ **Parallel Processing** - Fast multi-file processing
-- ✅ **Container-Friendly** - Perfect for Docker/Kubernetes
+- **Default Value Fallback** - `__VITE_API_URL:http://localhost:3000__`
+- **4 Placeholder Styles** - `__KEY__`, `{{KEY}}`, `${KEY}`, `${{KEY}}`
+- **Include/Exclude Filtering** - Regex or exact match control
+- **Parallel Processing** - Fast multi-file processing
+- **Container-Friendly** - Perfect for Docker/Kubernetes
 
 ### How It Works
 

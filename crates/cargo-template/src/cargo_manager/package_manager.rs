@@ -38,8 +38,8 @@ impl PackageCargo {
     /// This is used to configure package fields to inherit from the workspace.
     fn depend_on_workspace() -> Item {
         let mut table = InlineTable::new();
-        table.set_dotted(true);
         table.insert("workspace", true.into());
+        table.set_dotted(true);
         toml_edit::value(table)
     }
 }
@@ -90,22 +90,7 @@ impl CargoManager for PackageCargo {
             .as_table_mut()
             .context("dependencies section not found")?;
 
-        let mut value = spec.map_or_else(
-            || InlineTable::new(),
-            |s| {
-                InlineTable::from(
-                    s.as_inline_table()
-                        .expect("spec is not an inline table")
-                        .clone(),
-                )
-            },
-        );
-
-        // Remove version and set workspace = true for workspace dependencies
-        value.remove("version");
-        value.insert("workspace", true.into());
-
-        deps.insert_formatted(key, toml_edit::value(value));
+        deps.insert_formatted(key, Self::depend_on_workspace());
         Ok(())
     }
 

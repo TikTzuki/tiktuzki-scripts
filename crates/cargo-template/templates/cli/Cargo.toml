@@ -1,0 +1,4 @@
+[workspace.dependencies]
+
+# Cli
+clap = { version = "4", features = ["derive"] }
