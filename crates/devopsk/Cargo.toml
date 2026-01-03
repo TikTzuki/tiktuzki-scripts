@@ -12,14 +12,11 @@ homepage.workspace = true
 repository.workspace = true
 exclude.workspace = true
 
-[lints]
-workspace = true
-
 [[bin]]
 name = "devopsk"
 
 [dependencies]
-clap = { workspace = true, features = ["derive"] }
+clap = { workspace = true }
 anyhow = { workspace = true }
 walkdir = { workspace = true }
 dotenvy = { workspace = true }
@@ -39,3 +36,6 @@ http-body = "0.4.6"
 aws-smithy-runtime-api = "1.9.3"
 bytes = "1.10.1"
 zstd = { version = "0.13.3", features = ["zstdmt"] }
+
+[lints]
+workspace = true

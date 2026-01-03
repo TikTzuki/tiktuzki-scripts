@@ -1,0 +1,25 @@
+[package]
+name = "cargo-template"
+description = "A template for Cargo projects"
+publish = false
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+exclude.workspace = true
+
+[[bin]]
+name = "cargo-template"
+
+[dependencies]
+clap = { workspace = true }
+anyhow = { workspace = true }
+toml_edit = "0.24.0+spec-1.1.0"
+include_dir = "0.7"
+
+[lints]
+workspace = true

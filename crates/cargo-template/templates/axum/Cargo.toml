@@ -1,0 +1,16 @@
+# Axum metadata
+[workspace.dependencies]
+
+# Package metadata
+axum = { version = "0.8" }
+axum-swagger-ui = { version = "0.3" }
+aide = { version = "0" }
+tower = { version = "0.5" }
+utoipa = { version = "5" }
+utoipa-swagger-ui = { version = "9" }
+utoipa-axum = { version = "0" }
+utoipa-redoc = { version = "6" }
+utoipa-rapidoc = { version = "6" }
+utoipa-scalar = { version = "0" }
+paste = { version = "1" }
+dyson_http = { version = "0.1" }
