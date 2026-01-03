@@ -1,15 +1,32 @@
+//! Workspace Cargo.toml management.
+//!
+//! This module provides functionality for managing workspace-level Cargo.toml files.
+
 use crate::cargo_manager::CargoManager;
 use crate::cargo_manager::utils::*;
 use anyhow::Context;
 use std::path::PathBuf;
 use toml_edit::{Array, DocumentMut, InlineTable, Item, Key, Table};
 
+/// Manager for workspace-level Cargo.toml files.
+///
+/// This struct handles Cargo.toml files that contain a `[workspace]` section,
+/// managing workspace-level dependencies and metadata.
 pub struct WorkspaceCargo {
-    pub path: PathBuf,
-    pub doc: DocumentMut,
+    /// Path to the Cargo.toml file
+    path: PathBuf,
+
+    /// Parsed TOML document
+    doc: DocumentMut,
 }
 
 impl WorkspaceCargo {
+    /// Creates a new WorkspaceCargo instance.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to the Cargo.toml file
+    /// * `doc` - Parsed TOML document
     pub fn new(path: PathBuf, doc: DocumentMut) -> Self {
         Self { path, doc }
     }
@@ -21,28 +38,30 @@ impl CargoManager for WorkspaceCargo {
             .as_table_mut()
             .context("workspace.package section not found")?;
 
+        // Insert fields from template or use defaults
         insert_if_missing(wp, template, "description", || "".into());
-
         insert_if_template_not_empty(wp, template, "version", || "0.0.1".into());
         insert_if_template_not_empty(wp, template, "edition", || "2024".into());
         insert_if_template_not_empty(wp, template, "rust-version", || "1.90".into());
         insert_if_missing(wp, template, "authors", || Array::default().into());
         insert_if_missing(wp, template, "license", || "".into());
         insert_if_missing(wp, template, "homepage", || "".into());
+
+        // Automatically set repository from git remote
         wp.insert("repository", get_git_remote_url()?.into());
+
         insert_if_template_not_empty(wp, template, "exclude", || Array::default().into());
+
         Ok(())
     }
 
     fn get_dependency(&self, name: &Key) -> anyhow::Result<&Item> {
         let deps = self.doc["workspace"]["dependencies"]
             .as_table()
-            .context("dependencies section not found")?;
+            .context("workspace.dependencies section not found")?;
 
-        let value = deps
-            .get(name)
-            .context(format!("Dependency '{}' not found", name))?;
-        Ok(value)
+        deps.get(name)
+            .context(format!("Dependency '{}' not found", name))
     }
 
     fn remove_dependency(&mut self, name: &Key) -> anyhow::Result<()> {
@@ -58,13 +77,18 @@ impl CargoManager for WorkspaceCargo {
         let deps = self.doc["workspace"]["dependencies"]
             .as_table_mut()
             .context("workspace.dependencies not found")?;
-        let value = spec.map_or(InlineTable::new(), |s| {
-            InlineTable::from(
-                s.as_inline_table()
-                    .expect("spec is not an inline table")
-                    .clone(),
-            )
-        });
+
+        let value = spec.map_or_else(
+            || InlineTable::new(),
+            |s| {
+                InlineTable::from(
+                    s.as_inline_table()
+                        .expect("spec is not an inline table")
+                        .clone(),
+                )
+            },
+        );
+
         deps.insert_formatted(key, toml_edit::value(value));
         Ok(())
     }
