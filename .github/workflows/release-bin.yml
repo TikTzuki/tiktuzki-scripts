@@ -54,7 +54,7 @@ jobs:
               LINKER="x86_64-linux-musl-gcc"
               ;;
             aarch64-unknown-linux-musl)
-              sudo apt-get install -y gcc-aarch64-linux-gnu musl-tools
+              sudo apt-get install -y musl-tools
               LINKER="aarch64-linux-musl-gcc"
               echo "cc = \"aarch64-linux-musl-gcc\"" >> .cargo/config.toml
               echo "cxx = \"aarch64-linux-musl-g++\"" >> .cargo/config.toml
