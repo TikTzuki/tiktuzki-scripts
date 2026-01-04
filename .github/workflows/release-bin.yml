@@ -50,11 +50,8 @@ jobs:
         if: matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
           cat >> Cross.toml << 'EOF'
-          [build.env]
-          passthrough = [
-            "CC=clang",
-            "CXX=clang++",
-          ]
+          [target.x86_64-unknown-linux-gnu]
+          image = "ghcr.io/cross-rs/x86_64-unknown-linux-gnu:latest"
           EOF
 
       - name: Build binary (macOS)
