@@ -13,18 +13,24 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
           - os: macos-latest
             target: x86_64-apple-darwin
+            type: macos
           - os: macos-latest
             target: aarch64-apple-darwin
+            type: macos
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            type: linux
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            type: linux
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
+            type: linux
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
+            type: linux
 
     steps:
       - name: Checkout source
@@ -38,14 +44,6 @@ jobs:
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
 
-      - name: Configure Cross-Toolchain
-        if: matrix.target == 'x86_64-apple-darwin' || matrix.target == 'aarch64-apple-darwin'
-        run: |
-          rustup target add ${{ matrix.target }}
-          git clone https://github.com/cross-rs/cross
-          cd cross
-          git submodule update --init --remote
-          cd ..
       #      - name: Configure cross linker
       #        if: matrix.target == 'aarch64-unknown-linux-gnu' || matrix.target == 'x86_64-unknown-linux-musl' || matrix.target == 'aarch64-unknown-linux-musl'
       #        run: |
@@ -78,7 +76,13 @@ jobs:
       #          echo "[target.${{ matrix.target }}]" >> .cargo/config.toml
       #          echo "linker = \"$LINKER\"" >> .cargo/config.toml
 
-      - name: Build binary
+      - name: Build binary (macOS)
+        if: matrix.type == 'macos'
+        run: |
+          cargo build --bins --release --target ${{ matrix.target }}
+
+      - name: Build binary (Linux)
+        if: matrix.type == 'linux'
         run: |
           cargo install cross --git https://github.com/cross-rs/cross
           cross build --bins --release --target ${{ matrix.target }}
