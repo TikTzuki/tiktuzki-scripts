@@ -77,6 +77,11 @@ jobs:
       #
       #          echo "[target.${{ matrix.target }}]" >> .cargo/config.toml
       #          echo "linker = \"$LINKER\"" >> .cargo/config.toml
+      - name: Configure Build (Fix cc bug)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        run: |
+          echo "[target.x86_64-unknown-linux-gnu]" >> Cross.toml
+          echo "cc=clang" >> Cross.toml
 
       - name: Build binary (macOS)
         if: matrix.type == 'macos'
