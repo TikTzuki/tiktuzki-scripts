@@ -10,7 +10,9 @@ jobs:
   deploy_binaries:
     name: Build for ${{ matrix.os }} ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
