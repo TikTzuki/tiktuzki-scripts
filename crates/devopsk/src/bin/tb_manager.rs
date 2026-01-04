@@ -204,10 +204,10 @@ async fn main() -> Result<()> {
                 args.backup_file
             ));
         }
-        let region = std::env::var("AWS_DEFAULT_REGION").unwrap_or("ap-southeast-1".to_string());
+        // let region = std::env::var("AWS_DEFAULT_REGION").unwrap_or("ap-southeast-1".to_string());
         let bucket = args.bucket.as_str();
         let config = defaults(BehaviorVersion::v2025_08_07())
-            .region(Region::new(region.to_owned()))
+            // .region(Region::new(region.to_owned()))
             .load()
             .await;
         let client = Client::new(&config);
