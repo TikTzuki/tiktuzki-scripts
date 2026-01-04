@@ -72,7 +72,7 @@ jobs:
 
       - name: Build binary
         run: |
-          sudo apt-get install cross
+          cargo install cross --git https://github.com/cross-rs/cross
           cross build --bins --release --target ${{ matrix.target }}
 
       - name: Collect binary artifacts
