@@ -15,24 +15,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            type: macos
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            type: macos
+          #          - os: macos-latest
+          #            target: x86_64-apple-darwin
+          #            type: macos
+          #          - os: macos-latest
+          #            target: aarch64-apple-darwin
+          #            type: macos
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             type: linux
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            type: linux
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            type: linux
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            type: linux
+    #          - os: ubuntu-latest
+    #            target: aarch64-unknown-linux-gnu
+    #            type: linux
+    #          - os: ubuntu-latest
+    #            target: x86_64-unknown-linux-musl
+    #            type: linux
+    #          - os: ubuntu-latest
+    #            target: aarch64-unknown-linux-musl
+    #            type: linux
 
     steps:
       - name: Checkout source
@@ -46,42 +46,16 @@ jobs:
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
 
-      #      - name: Configure cross linker
-      #        if: matrix.target == 'aarch64-unknown-linux-gnu' || matrix.target == 'x86_64-unknown-linux-musl' || matrix.target == 'aarch64-unknown-linux-musl'
-      #        run: |
-      #          mkdir -p .cargo
-      #          sudo apt-get update
-      #
-      #          case "${{ matrix.target }}" in
-      #            aarch64-unknown-linux-gnu)
-      #              sudo apt-get install -y gcc-aarch64-linux-gnu
-      #              LINKER="aarch64-linux-gnu-gcc"
-      #              ;;
-      #            x86_64-unknown-linux-musl)
-      #              sudo apt-get install -y musl-tools
-      #              LINKER="x86_64-linux-musl-gcc"
-      #              ;;
-      #            aarch64-unknown-linux-musl)
-      ##            rustup target add aarch64-unknown-linux-musl
-      ##            sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu
-      #            cargo install cross
-      #            LINKER="aarch64-unknown-linux-musl"
-      #               LINKER="aarch64-linux-gnu-gcc"
-      #                        echo "cc = \"aarch64-linux-musl-gcc\"" >> .cargo/config.toml
-      #                        echo "cxx = \"aarch64-linux-musl-g++\"" >> .cargo/config.toml
-      #                        echo "ar = \"aarch64-linux-musl-ar\"" >> .cargo/config.toml
-      #               export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc
-      #               export CC=aarch64-linux-gnu-gcc
-      #              ;;
-      #          esac
-      #
-      #          echo "[target.${{ matrix.target }}]" >> .cargo/config.toml
-      #          echo "linker = \"$LINKER\"" >> .cargo/config.toml
       - name: Configure Build (Fix cc bug)
         if: matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
-          echo "[target.x86_64-unknown-linux-gnu]" >> Cross.toml
-          echo "cc=\"clang\"" >> Cross.toml
+          cat >> Cross.toml << 'EOF'
+          [build.env]
+          passthrough = [
+            "CC=clang",
+            "CXX=clang++",
+          ]
+          EOF
 
       - name: Build binary (macOS)
         if: matrix.type == 'macos'
