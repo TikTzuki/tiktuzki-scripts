@@ -1,0 +1,39 @@
+[package]
+name = "cluster-backup"
+description = "Archive, encrypt and ship a microk8s backup run to S3"
+publish = false
+
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+exclude.workspace = true
+
+[[bin]]
+name = "cluster-backup"
+
+[dependencies]
+anyhow = { workspace = true }
+# `env` is not in the workspace default features; the CLI reads S3_BUCKET,
+# AGE_RECIPIENT and friends so systemd can configure it via Environment=.
+clap = { workspace = true, features = ["env"] }
+tokio = { workspace = true, features = ["full"] }
+tempfile = { workspace = true }
+
+aws-config = "1.8.12"
+aws-sdk-s3 = "1"
+chrono = "0.4.42"
+dyson_log = "0"
+log = "0.4.28"
+
+# Archive pipeline. tar -> zstd -> age, in that order: encrypted bytes are
+# incompressible, so compression must happen first.
+tar = "0.4"
+zstd = { version = "0.13.3", features = ["zstdmt"] }
+age = "0.12"
+
+[lints]
+workspace = true
